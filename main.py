@@ -675,13 +675,16 @@ def main():
     footer = "COMPILED FROM WIRE REPORTS OF TUESDAY 17 NOVEMBER 2026 - DRAWN BY A PROGRAM - MAKE.FUN"
     fitted_centered_text(canvas, 958, footer, 1, INK)
 
-    # Resolve output paths within the repository before creating anything.
+    # Resolve relative output paths from the repository directory.
     repository = os.path.dirname(os.path.realpath(__file__))
-    requested = os.environ.get("MAKEFUN_OUTPUT_DIR", "out")
-    output_dir = os.path.realpath(os.path.join(repository, requested))
-    assert os.path.commonpath((repository, output_dir)) == repository, "Output must stay inside the repository"
+    requested = os.environ.get("MAKEFUN_OUTPUT_DIR")
+    if requested is None:
+        output_dir = os.path.join(repository, "out")
+    elif os.path.isabs(requested):
+        output_dir = requested
+    else:
+        output_dir = os.path.join(repository, requested)
     output_path = os.path.join(output_dir, "entry.png")
-    assert os.path.commonpath((repository, os.path.realpath(output_path))) == repository
     os.makedirs(output_dir, exist_ok=True)
     write_png(output_path, canvas)
     print("wrote entry.png")
